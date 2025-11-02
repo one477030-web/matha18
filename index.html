@@ -4,7 +4,161 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Math A+ — Nền tảng Toán học 12A18</title>
-  <link rel="stylesheet" href="mathhome.css">
+  <style>
+    :root{
+    --bg:#FFF9E6;
+    --card:#FFFFFF;
+    --ink:#1f2328;
+    --muted:#5f6368;
+    --brand:#FF8A00;
+    --brand-2:#FFD166;
+    --shadow:0 10px 30px rgba(0,0,0,.08);
+    --radius:18px;
+    }
+    /* Tự chỉnh sửa */
+    
+    /* Tự chỉnh sửa */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    color:var(--ink);
+    background:linear-gradient(180deg, #FFF4D8 0%, var(--bg) 18%, #FFF 100%);
+    }
+    a{color:inherit;text-decoration:none}
+    .container{max-width:1100px;margin:0 auto;padding:0 20px}
+    
+    header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid #f0e7d2;}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:12px;background:conic-gradient(from 210deg, var(--brand), var(--brand-2));color:#fff;font-weight:900;box-shadow:var(--shadow)}
+    .wordmark{font-size:20px;font-weight:800;letter-spacing:.2px}
+    .wordmark sup{font-size:.7em;font-weight:700; margin-left:2px; color:var(--brand)}
+    nav a{padding:10px 12px;border-radius:12px}
+    nav a:hover{background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    
+    section{padding:80px 0;border-top:2px solid #f7f0e0;}
+    
+    .hero{position:relative;overflow:hidden;padding-top:60px}
+    .hero .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;}
+    .badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #ffe5bf;color:#a26400;padding:6px 12px;border-radius:999px;font-weight:600}
+    h1{font-size:clamp(28px, 4.2vw, 48px);line-height:1.1;margin:14px 0 10px}
+    .lead{color:var(--muted);font-size:clamp(14px,2.2vw,18px)}
+    .cta{display:flex;gap:12px;margin-top:22px}
+    .btn{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:14px;border:1px solid transparent;font-weight:700;cursor:pointer;transition:.2s ease}
+    .btn-primary{background:linear-gradient(90deg,var(--brand), #FFA733);color:#fff;box-shadow:var(--shadow)}
+    .btn-primary:hover{transform:translateY(-1px)}
+    .btn-ghost{background:#fff;border-color:#ffe2b7;color:#a26400}
+    .btn-ghost:hover{box-shadow:var(--shadow)}
+    
+    .section-h{font-size:24px;margin:0 0 18px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .card{background:var(--card);border:1px solid #f3ece0;border-radius:18px;padding:18px 18px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
+    .card small{color:var(--muted)}
+    .card h3{margin:6px 0 6px}
+    .card p{margin:0 0 10px;color:var(--muted);line-height:1.5}
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{font-size:12px;background:#fff6e9;border:1px solid #ffe2b7;color:#A25B00;padding:6px 10px;border-radius:999px;font-weight:700}
+    
+    .soon{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .soon .soon-card{background:linear-gradient(180deg,#fff, #FFF6E6);border:1px solid #ffe2b7;border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+    .soon h4{margin:6px 0}
+    .soon p{margin:6px 0 0;color:var(--muted)}
+    
+    footer{margin-top:30px;border-top:1px solid #f0e7d2;background:#fff}
+    .foot{display:flex;justify-content:space-between;gap:16px;padding:18px 0;color:#6f6f6f;font-size:14px}
+    
+    @media (max-width: 980px){
+    .hero .wrap{grid-template-columns:1fr;}
+    .hero-visual{height:200px}
+    .grid{grid-template-columns:1fr}
+    .soon{grid-template-columns:1fr}
+    }
+    
+    /* Laptop & Desktop (>=1024px) */
+    @media (min-width: 1024px) {
+      .container {
+        max-width: 1100px;
+        padding: 0 40px;
+      }
+      .hero .wrap {
+        grid-template-columns: 1.2fr 0.8fr;
+      }
+    }
+    
+    /* Tablet (768px – 1023px) */
+    @media (max-width: 1023px) and (min-width: 768px) {
+      body {
+        font-size: 16px;
+      }
+      .hero .wrap {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .hero-visual {
+        margin-top: 40px;
+        height: 220px;
+      }
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    /* Mobile (<=767px) */
+    @media (max-width: 767px) {
+      body {
+        font-size: 15px;
+      }
+      header .nav {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .hero .wrap {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+      .hero-visual {
+        height: 180px;
+        margin-top: 20px;
+      }
+      .grid, .soon {
+        grid-template-columns: 1fr;
+      }
+      .btn {
+        padding: 10px 14px;
+        font-size: 14px;
+      }
+      .foot {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+    }
+    @media (max-width: 500px) {
+      .wordmark {
+        font-size: 18px;
+      }
+      .logo {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+      }
+    }
+    @media (max-width: 768px) {
+      section {
+        padding: 50px 0;
+      }
+    }
+    @media (max-width: 480px) {
+      section {
+        padding: 40px 0;
+      }
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -141,3 +295,4 @@
   </script>
 </body>
 </html>
+
