@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ứng dụng Toán học – Học sinh & Giáo viên</title>
+  <!-- MathJax để hiển thị công thức đẹp (tùy mạng, có thể bỏ nếu không cần) -->
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']] }, svg: {fontCache:'global'} };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Poppins',sans-serif;background:#f9fafc;color:#222}
+    nav{height:70px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center}
+    .logo-slot{width:200px;height:50px;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#888}
+    main{max-width:1100px;margin:32px auto 80px;background:#fff;padding:24px 28px;border-radius:18px;box-shadow:0 4px 10px rgba(0,0,0,.06)}
+    h1{font-size:1.6rem;text-align:center;margin-bottom:8px}
+    .subtitle{text-align:center;color:#666;margin-bottom:18px}
+    .grid{display:grid;gap:12px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{padding:10px 14px;border:none;border-radius:10px;background:#f0f0f0;cursor:pointer;font-weight:600}
+    .btn-primary{background:#2f6fed;color:#fff}
+    .btn-success{background:#16a34a;color:#fff}
+    .btn-danger{background:#ef4444;color:#fff}
+    .btn-warning{background:#f59e0b;color:#fff}
+    .btn-ghost{background:#f7f7f7}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    input[type="text"], input[type="number"], select, textarea{padding:10px 12px;border:1px solid #ddd;border-radius:10px}
+    textarea{min-height:70px}
+    .section{border:1px solid #eee;border-radius:14px;padding:16px}
+    .section h3{margin-bottom:10px}
+    .muted{color:#777}
+    .divider{height:1px;background:#eee;margin:12px 0}
+
+    /* STUDENT styles (tái sử dụng từ bản cũ) */
+    .difficulty{display:flex;justify-content:center;gap:10px;margin:10px 0 20px}
+    .easy{background:#dfffe0}.medium{background:#fff4d5}.hard{background:#ffdcdc}
+    .easy:hover{background:#bfffbf}.medium:hover{background:#ffeaa0}.hard:hover{background:#ffb3b3}
+    .question-box{text-align:center;font-size:1.2rem;margin-bottom:16px;min-height:60px}
+    .answer-box{display:flex;gap:10px;justify-content:center;align-items:center}
+    .answer-box input{padding:8px 10px;border-radius:10px;border:1px solid #ccc;width:160px;text-align:center;font-size:1rem}
+    #result,#resultAI{text-align:center;font-weight:600;margin-top:10px;min-height:24px}
+    .scoreboard{margin-top:22px;border-top:2px solid #eee;padding-top:12px}
+    table{width:100%;border-collapse:collapse;text-align:center}
+    th,td{padding:10px;border-bottom:1px solid #eee}
+    th{background:#f3f3f3}
+    .highlight-gold{background:#fff6a3;font-weight:600}
+    .highlight-silver{background:#dce2f9;font-weight:600}
+    .highlight-bronze{background:#f2d2b2;font-weight:600}
+    .player-row{font-weight:800}
+    .hidden{display:none}
+
+    /* TEACHER builder */
+    .kbd{display:inline-block;padding:6px 10px;border:1px solid #ddd;border-radius:8px;background:#fafafa;cursor:pointer;margin:4px;font-weight:600}
+    .kbd:hover{background:#f0f0f0}
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f5f7ff;border:1px solid #e5e9ff;margin:4px}
+    .chip .x{cursor:pointer;color:#ef4444;font-weight:800}
+    .toast{position:fixed;top:20px;right:20px;background:#111;color:#fff;padding:12px 16px;border-radius:10px;opacity:0;transform:translateY(-10px);transition:.25s}
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    /* Multiple choice block */
+    .choices{display:grid;gap:8px;max-width:560px;margin:0 auto}
+    .choice{border:1px solid #ddd;border-radius:10px;padding:10px;text-align:left;cursor:pointer}
+    .choice input{margin-right:8px}
+
+    /* --- Responsive layout --- */
+    @media (max-width: 1100px) {
+    main { margin: 16px auto 60px; padding: 18px 20px; }
+    h1 { font-size: 1.4rem; }
+    }
+
+    @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr !important; }
+    .row { flex-direction: column; gap: 8px; align-items: stretch; }
+    input[type="text"], input[type="number"], select, textarea {
+        width: 100%;
+    }
+    .answer-box { flex-direction: column; gap: 8px; }
+    .choices { max-width: 100%; }
+    .section { padding: 14px; }
+    }
+
+    @media (max-width: 700px) {
+    body { font-size: 0.95rem; }
+    nav { height: 60px; }
+    .logo-slot {
+        width: 150px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+    h1 { font-size: 1.2rem; }
+    .btn { padding: 8px 10px; font-size: 0.9rem; }
+    .scoreboard table th, .scoreboard table td { padding: 6px; font-size: 0.9rem; }
+    .question-box { font-size: 1rem; }
+    main { box-shadow: none; border-radius: 10px; }
+    }
+
+    @media (max-width: 500px) {
+    .row { gap: 6px; }
+    nav { font-size: 0.85rem; }
+    .btn { width: 100%; border-radius: 8px; }
+    .logo-slot {
+        width: 120px;
+        height: 36px;
+    }
+    .subtitle { font-size: 0.9rem; }
+    .section h3, .section h4 { font-size: 1rem; }
+    .toast {
+        width: calc(100% - 40px);
+        left: 20px;
+        right: 20px;
+        font-size: 0.9rem;
+    }
+    }
+
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo-slot">Chèn logo ở đây</div>
+  </nav>
+
+  <main>
+    <h1>🎯 Ứng dụng Toán học</h1>
+    <p class="subtitle">Chế độ Học sinh giữ nguyên. Thêm khu Giáo viên để tạo đề & trải nghiệm.</p>
+
+    <!-- ACTION BAR: các nút thân thiện cho giáo viên -->
+    <div class="row" style="justify-content:center; margin-bottom:14px; flex-wrap:wrap;">
+      <button id="btnSendFake" class="btn btn-success">🧮 Tạo đề của tôi và gửi cho học sinh</button>
+      <button id="btnTryMine" class="btn btn-primary">🎓 Cho tôi trải nghiệm thử đề của mình</button>
+      <button id="btnTryMinePlusAI" class="btn btn-warning">🤖 Cho tôi trải nghiệm đề của mình kèm đề AI</button>
+      <button id="btnGoAI" class="btn btn-ghost">🌱 Trải nghiệm đề AI có sẵn</button>
+    </div>
+
+    <!-- TEACHER PANEL -->
+    <section id="teacherPanel" class="section">
+      <h3>👩‍🏫 Khu Giáo viên – tạo câu hỏi</h3>
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:16px;">
+        <div>
+          <label>Loại câu hỏi</label>
+          <select id="qType" style="width:100%; margin-top:6px;">
+            <option value="short">Tự luận / Nhập đáp án</option>
+            <option value="mc4">Trắc nghiệm 4 đáp án</option>
+            <option value="sqrt">Biểu thức có căn</option>
+            <option value="derivative">Đạo hàm</option>
+            <option value="integral">Tích phân</option>
+          </select>
+          <div class="divider"></div>
+
+          <label>Nhập phép toán / đề bài</label>
+          <textarea id="qExpr" placeholder="Ví dụ: sqrt(x^2 + 4) hoặc d/dx (x^2 + 3x)" style="width:100%; margin-top:6px;"></textarea>
+
+          <div class="muted" style="margin:8px 0 6px;">Bảng ký tự toán học (chèn vào vị trí con trỏ):</div>
+          <div>
+            <span class="kbd" data-insert="√">√</span>
+            <span class="kbd" data-insert="^">^</span>
+            <span class="kbd" data-insert="π">π</span>
+            <span class="kbd" data-insert="∫">∫</span>
+            <span class="kbd" data-insert="dx">dx</span>
+            <span class="kbd" data-insert="dy">dy</span>
+            <span class="kbd" data-insert="/">/</span>
+            <span class="kbd" data-insert="Σ">Σ</span>
+            <span class="kbd" data-insert="( )">( )</span>
+          </div>
+        </div>
+        <div>
+          <label>Xem trước (hiển thị đẹp)</label>
+          <div id="qPreview" class="section" style="min-height:84px; display:flex;align-items:center;justify-content:center;">
+            <span class="muted">Công thức sẽ hiển thị ở đây…</span>
+          </div>
+
+          <!-- Khu đáp án cho giáo viên nhập -->
+          <div id="answerBuilder" class="section" style="margin-top:10px;">
+            <div class="row" style="justify-content:space-between;align-items:center;">
+              <strong>Đáp án</strong>
+              <div class="row">
+                <button id="btnAddAnswer" class="btn btn-ghost">+ Thêm đáp án</button>
+                <button id="btnClearAllAns" class="btn btn-danger">Xoá toàn bộ</button>
+              </div>
+            </div>
+            <div id="ansList" class="grid" style="margin-top:8px; grid-template-columns:1fr; gap:8px;"></div>
+            <div class="muted" style="margin-top:6px;">Chọn 1 đáp án đúng (nếu là trắc nghiệm). Với tự luận, bỏ qua phần chọn đúng ở đây.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px; justify-content:space-between;">
+        <div class="row">
+          <button id="btnAddQuestion" class="btn btn-primary">➕ Thêm câu vào đề</button>
+          <button id="btnResetForm" class="btn">Làm mới biểu mẫu</button>
+        </div>
+        <div class="row">
+          <button id="btnClearAllQ" class="btn btn-danger">🧹 Xoá toàn bộ câu trong đề</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <h4>📚 Câu trong đề của bạn</h4>
+      <div id="myQuestions" class="grid"></div>
+    </section>
+
+    <!-- STUDENT PANEL: mặc định ẩn, hiện khi trải nghiệm -->
+    <section id="studentPanel" class="section hidden">
+      <h3>🎓 Trải nghiệm đề – phiên bản Học sinh</h3>
+      <p class="muted" id="studentModeNote">Nguồn câu hỏi: đề giáo viên vừa tạo.</p>
+
+      <div class="row" style="gap:10px; align-items:center; margin-bottom:10px;">
+        <input id="playerName" type="text" placeholder="Nhập tên của bạn..." />
+        <select id="duration">
+          <option value="0">⏳ Không giới hạn</option>
+          <option value="60">1 phút</option>
+          <option value="120">2 phút</option>
+          <option value="300">5 phút</option>
+        </select>
+        <button id="btnStart" class="btn btn-primary">Bắt đầu</button>
+        <button id="btnEnd" class="btn btn-danger" disabled>Kết thúc</button>
+        <span id="timer" class="muted">⏰ Thời gian: --</span>
+      </div>
+
+      <!-- Nút chọn độ khó chỉ dùng cho bộ AI random; với đề giáo viên sẽ ẩn tự động -->
+      <div id="difficultyBar" class="difficulty">
+        <button class="btn easy" id="btnEasy" disabled>Dễ</button>
+        <button class="btn medium" id="btnMedium" disabled>Trung bình</button>
+        <button class="btn hard" id="btnHard" disabled>Khó</button>
+      </div>
+
+      <div class="question-area">
+        <div class="question-box" id="question">Hãy bắt đầu để tạo câu hỏi.</div>
+        <!-- Vùng trả lời dạng tự luận (nhập đáp án) -->
+        <div class="answer-box" id="boxShort">
+          <input type="text" id="answer" placeholder="Nhập đáp án..." disabled />
+          <button id="btnCheck" class="btn" disabled>Kiểm tra</button>
+        </div>
+        <!-- Vùng trả lời trắc nghiệm -->
+        <div id="boxMC" class="choices hidden"></div>
+        <p id="result"></p>
+        <p id="scoreDisplay">Điểm: 0</p>
+      </div>
+
+      <div class="scoreboard">
+        <h4>🏆 Bảng xếp hạng (mô phỏng)</h4>
+        <table>
+          <thead><tr><th>Hạng</th><th>Tên</th><th>Điểm</th></tr></thead>
+          <tbody id="ranking"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STUDENT PANEL – Đề AI có sẵn (hiển thị khi chọn TryMine+AI) -->
+    <section id="studentPanelAI" class="section hidden">
+      <h3>🤖 Trải nghiệm đề AI (mẫu)</h3>
+      <p class="muted">Nguồn câu hỏi: sinh ngẫu nhiên theo độ khó.</p>
+      <div class="row" style="gap:10px; align-items:center; margin-bottom:10px;">
+        <input id="playerNameAI" type="text" placeholder="Nhập tên của bạn..." />
+        <select id="durationAI">
+          <option value="0">⏳ Không giới hạn</option>
+          <option value="60">1 phút</option>
+          <option value="120">2 phút</option>
+          <option value="300">5 phút</option>
+        </select>
+        <button id="btnStartAI" class="btn btn-primary">Bắt đầu</button>
+        <button id="btnEndAI" class="btn btn-danger" disabled>Kết thúc</button>
+        <span id="timerAI" class="muted">⏰ Thời gian: --</span>
+      </div>
+      <div class="difficulty">
+        <button class="btn easy" id="btnEasyAI" disabled>Dễ</button>
+        <button class="btn medium" id="btnMediumAI" disabled>Trung bình</button>
+        <button class="btn hard" id="btnHardAI" disabled>Khó</button>
+      </div>
+      <div class="question-area">
+        <div class="question-box" id="questionAI">Hãy bắt đầu để tạo câu hỏi.</div>
+        <div class="answer-box">
+          <input type="text" id="answerAI" placeholder="Nhập đáp án..." disabled />
+          <button id="btnCheckAI" class="btn" disabled>Kiểm tra</button>
+        </div>
+        <p id="resultAI"></p>
+        <p id="scoreDisplayAI">Điểm: 0</p>
+      </div>
+      <div class="scoreboard">
+        <h4>🏆 Bảng xếp hạng (mô phỏng)</h4>
+        <table>
+          <thead><tr><th>Hạng</th><th>Tên</th><th>Điểm</th></tr></thead>
+          <tbody id="rankingAI"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast">✅ Đề của bạn đã được gửi thành công!</div>
+
+  <script>
+    // ---------- TEACHER BUILDER LOGIC ----------
+    const qType = document.getElementById('qType');
+    const qExpr = document.getElementById('qExpr');
+    const qPreview = document.getElementById('qPreview');
+    const ansList = document.getElementById('ansList');
+    const myQuestions = document.getElementById('myQuestions');
+    const btnAddQuestion = document.getElementById('btnAddQuestion');
+    const btnResetForm = document.getElementById('btnResetForm');
+    const btnClearAllQ = document.getElementById('btnClearAllQ');
+    const btnAddAnswer = document.getElementById('btnAddAnswer');
+    const btnClearAllAns = document.getElementById('btnClearAllAns');
+
+    const btnSendFake = document.getElementById('btnSendFake');
+    const btnTryMine = document.getElementById('btnTryMine');
+    const btnTryMinePlusAI = document.getElementById('btnTryMinePlusAI');
+    const btnGoAI = document.getElementById('btnGoAI');
+
+    const toast = document.getElementById('toast');
+
+    let teacherSet = []; // mảng câu hỏi giáo viên
+
+    function renderPreview(){
+      const tex = qExpr.value.trim();
+      qPreview.innerHTML = tex? `$${tex}$` : '<span class="muted">Công thức sẽ hiển thị ở đây…</span>';
+      if(window.MathJax) MathJax.typesetPromise([qPreview]);
+    }
+
+    qExpr.addEventListener('input', renderPreview);
+    document.querySelectorAll('.kbd').forEach(k=>{
+      k.addEventListener('click', ()=>{
+        const ins = k.getAttribute('data-insert');
+        const start = qExpr.selectionStart||qExpr.value.length;
+        const end = qExpr.selectionEnd||qExpr.value.length;
+        const before = qExpr.value.slice(0,start);
+        const after = qExpr.value.slice(end);
+        qExpr.value = before + ins + after;
+        qExpr.focus();
+        qExpr.selectionStart = qExpr.selectionEnd = start + ins.length;
+        renderPreview();
+      })
+    });
+
+    function addAnsRow(text=''){
+      const id = 'ans_'+Math.random().toString(36).slice(2,8);
+      const wrap = document.createElement('div');
+      wrap.className='chip';
+      wrap.innerHTML=`<label style="display:flex;align-items:center;gap:8px;">
+        <input type="radio" name="correct" title="Đáp án đúng" />
+        <input type="text" class="ansInput" placeholder="Nhập đáp án" value="${text.replace(/"/g,'&quot;')}" />
+      </label>
+      <span class="x" title="Xoá">✕</span>`;
+      const del = wrap.querySelector('.x');
+      del.onclick=()=>wrap.remove();
+      ansList.appendChild(wrap);
+    }
+
+    btnAddAnswer.onclick = ()=>{
+      // với trắc nghiệm, tối đa 4 đáp án để gọn giao diện
+      if(qType.value==='mc4' && ansList.querySelectorAll('.chip').length>=4) return alert('Tối đa 4 đáp án cho dạng trắc nghiệm.');
+      addAnsRow('');
+    }
+    btnClearAllAns.onclick = ()=> ansList.innerHTML='';
+
+    function resetForm(){ qExpr.value=''; ansList.innerHTML=''; renderPreview(); }
+    btnResetForm.onclick = resetForm;
+
+    btnAddQuestion.onclick = ()=>{
+      const type = qType.value;
+      const prompt = qExpr.value.trim();
+      if(!prompt) return alert('Vui lòng nhập đề bài/phép toán.');
+
+      let answers=[], correctIndex=null;
+      const chips=[...ansList.querySelectorAll('.chip')];
+      if(type==='mc4'){
+        if(chips.length<2) return alert('Trắc nghiệm cần ít nhất 2 đáp án.');
+        answers = chips.map(c=>c.querySelector('.ansInput').value.trim());
+        if(answers.some(a=>!a)) return alert('Có đáp án trống.');
+        correctIndex = chips.findIndex(c=>c.querySelector('input[type="radio"]').checked);
+        if(correctIndex===-1) return alert('Chưa chọn đáp án đúng.');
+      } else {
+        // tự luận: nếu giáo viên có nhập gợi ý đáp án thì lấy cái đầu tiên làm đáp án đúng
+        if(chips.length>0){
+          const first = chips[0].querySelector('.ansInput').value.trim();
+          if(first) { answers=[first]; correctIndex=0; }
+        }
+      }
+
+      const q = { type, question: prompt, answers, correct: correctIndex };
+      teacherSet.push(q);
+      paintMyQuestions();
+      // Reset gọn nhưng giữ loại câu hỏi hiện tại
+      qExpr.value=''; ansList.innerHTML=''; renderPreview();
+    }
+
+    function paintMyQuestions(){
+      if(teacherSet.length===0){ myQuestions.innerHTML='<div class="muted">Chưa có câu nào.</div>'; return; }
+      myQuestions.innerHTML = teacherSet.map((q,i)=>{
+        const typeLbl = q.type==='mc4'?'Trắc nghiệm 4 đáp án':(q.type==='short'?'Tự luận':'Biểu thức');
+        const ans = q.type==='mc4'? q.answers.map((a,idx)=>`${idx===q.correct?'✅ ':''}${a}`).join(' • ') : (q.answers?.[0]?`Đáp án: ${q.answers[0]}`:'(Tự luận)');
+        return `<div class="section"><div><strong>Câu ${i+1}</strong> – ${typeLbl}</div>
+          <div style="margin:6px 0">${q.question}</div>
+          <div class="muted">${ans}</div>
+          <div class="row" style="margin-top:6px;">
+            <button data-i="${i}" class="btn btn-danger btnDelQ">Xoá</button>
+          </div></div>`;
+      }).join('');
+      myQuestions.querySelectorAll('.btnDelQ').forEach(b=>{
+        b.onclick=()=>{ const i=+b.getAttribute('data-i'); teacherSet.splice(i,1); paintMyQuestions(); }
+      });
+      if(window.MathJax) MathJax.typesetPromise([myQuestions]);
+    }
+
+    btnClearAllQ.onclick = ()=>{ if(confirm('Xoá toàn bộ câu trong đề?')){ teacherSet=[]; paintMyQuestions(); } }
+
+    // ---------- TEACHER ACTION BUTTONS ----------
+    btnSendFake.onclick = ()=>{
+      // giả lập gửi: chỉ show toast
+      toast.textContent = '✅ Đề của bạn đã được gửi thành công!';
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'), 2200);
+    }
+
+    // Trải nghiệm đề của tôi: hiện studentPanel dùng teacherSet
+    const teacherPanel = document.getElementById('teacherPanel');
+    const studentPanel = document.getElementById('studentPanel');
+    const studentPanelAI = document.getElementById('studentPanelAI');
+    const studentModeNote = document.getElementById('studentModeNote');
+
+    btnTryMine.onclick = ()=>{
+      studentMode = 'teacher';
+      teacherPanel.classList.remove('hidden');
+      studentPanel.classList.remove('hidden');
+      studentPanelAI.classList.add('hidden');
+      studentModeNote.textContent = 'Nguồn câu hỏi: đề giáo viên vừa tạo.';
+      setupStudentForTeacher();
+      window.scrollTo({top: teacherPanel.offsetTop, behavior:'smooth'});
+    }
+
+    btnTryMinePlusAI.onclick = ()=>{
+      studentMode = 'teacher';
+      teacherPanel.classList.remove('hidden');
+      studentPanel.classList.remove('hidden');
+      studentPanelAI.classList.remove('hidden');
+      studentModeNote.textContent = 'Nguồn câu hỏi: đề giáo viên.';
+      setupStudentForTeacher();
+      setupAIStudent();
+      window.scrollTo({top: teacherPanel.offsetTop, behavior:'smooth'});
+    }
+
+    btnGoAI.onclick = ()=>{
+      // chỉ hiện panel AI, ẩn panel teacher-student
+      studentMode = 'ai';
+      teacherPanel.classList.remove('hidden');
+      studentPanel.classList.add('hidden');
+      studentPanelAI.classList.remove('hidden');
+      setupAIStudent();
+      window.scrollTo({top: teacherPanel.offsetTop, behavior:'smooth'});
+    }
+
+    // ---------- STUDENT (for teacher set) ----------
+    const els = {
+      name:document.getElementById('playerName'), btnStart:document.getElementById('btnStart'), btnEnd:document.getElementById('btnEnd'),
+      timer:document.getElementById('timer'), duration:document.getElementById('duration'),
+      difficultyBar:document.getElementById('difficultyBar'), btnEasy:document.getElementById('btnEasy'), btnMedium:document.getElementById('btnMedium'), btnHard:document.getElementById('btnHard'),
+      question:document.getElementById('question'), answer:document.getElementById('answer'), btnCheck:document.getElementById('btnCheck'),
+      boxShort:document.getElementById('boxShort'), boxMC:document.getElementById('boxMC'),
+      result:document.getElementById('result'), scoreDisplay:document.getElementById('scoreDisplay'), ranking:document.getElementById('ranking')
+    };
+
+    let currentAnswer = '', score = 0, playerName = 'Bạn', isPlaying=false, opponents=[], tickTimer=null, timer=null, timeLeft=0, duration=0, currentIndex=0, studentMode='teacher';
+    const baseOpponents=['Lan','Minh','An','Khoa','Hà'];
+    const randInt = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+
+    function resetOpponents(){opponents = baseOpponents.map(name=>({name,score:0}));}
+    function updateRanking(){
+      const all=[...opponents,{name:playerName,score}].sort((a,b)=>b.score-a.score);
+      els.ranking.innerHTML = all.map((p,i)=>{
+        let cls=''; if(i===0)cls='highlight-gold'; else if(i===1)cls='highlight-silver'; else if(i===2)cls='highlight-bronze';
+        if(p.name===playerName) cls += ' player-row';
+        return `<tr class="${cls}"><td>${i+1}</td><td>${p.name}</td><td>${p.score}</td></tr>`;
+      }).join('');
+    }
+    function startSim(){ tickTimer=setInterval(()=>{opponents.forEach(p=>p.score+=randInt(0,3)); updateRanking();},3000); }
+    function stopSim(){ if(tickTimer){ clearInterval(tickTimer); tickTimer=null; } }
+
+    function startTimer(){ if(duration===0){ els.timer.textContent='⏰ Thời gian: Không giới hạn'; return; }
+      timeLeft=duration; updateTimer(); timer=setInterval(()=>{ timeLeft--; updateTimer(); if(timeLeft<=0){ endGame(); } },1000);
+    }
+    function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+    function updateTimer(){ els.timer.textContent = `⏰ Thời gian: ${duration===0?'Không giới hạn':timeLeft+'s'}`; }
+
+    function lockUI(locked){ [els.answer,els.btnCheck].forEach(b=>b.disabled=locked); }
+
+    function startGame(){
+      if(studentMode==='teacher' && teacherSet.length===0){ alert('Đề giáo viên đang trống. Hãy thêm ít nhất 1 câu nhé.'); return; }
+      playerName=(els.name.value||'Bạn').trim(); duration=parseInt(els.duration.value); score=0; isPlaying=true; resetOpponents(); updateRanking(); els.scoreDisplay.textContent=`Điểm: ${score}`; els.result.textContent=''; lockUI(false); els.btnStart.disabled=true; els.btnEnd.disabled=false; currentIndex=0;
+      // Ẩn/hiện độ khó: nếu dùng đề giáo viên thì ẩn, nếu AI thì hiện (nhưng panel này chỉ cho teacherSet)
+      els.difficultyBar.classList.add('hidden');
+      nextQuestion_teacher();
+      startSim(); startTimer();
+    }
+
+    function endGame(){ isPlaying=false; stopSim(); stopTimer(); lockUI(true); els.btnStart.disabled=false; els.btnEnd.disabled=true; els.result.textContent='Trò chơi kết thúc!'; }
+
+    function nextQuestion_teacher(){
+      const q = teacherSet[currentIndex % teacherSet.length];
+      renderQuestion(q, els.question, els.boxShort, els.boxMC, els.answer);
+      currentAnswer = getCorrectAnswerForCheck(q);
+      els.result.textContent='';
+      currentIndex++;
+    }
+
+    function renderQuestion(q, qBox, boxShort, boxMC, inputEl){
+      qBox.innerHTML = q.question; if(window.MathJax) MathJax.typesetPromise([qBox]);
+      if(q.type==='mc4'){
+        boxShort.classList.add('hidden');
+        boxMC.classList.remove('hidden');
+        boxMC.innerHTML = q.answers.map((a,i)=>`<label class="choice"><input type="radio" name="mc_choice" value="${i}"> ${a}</label>`).join('');
+      } else {
+        boxShort.classList.remove('hidden');
+        boxMC.classList.add('hidden');
+        inputEl.value='';
+      }
+    }
+
+    function getCorrectAnswerForCheck(q){
+      if(q.type==='mc4') return String(q.correct);
+      // tự luận: nếu có đáp án gợi ý, dùng để check; nếu không, chấp nhận bất kỳ (coi như đúng khi không có đáp án mẫu)
+      return q.answers?.[0] ? String(q.answers[0]).trim() : null;
+    }
+
+    function checkAnswer(){ if(!isPlaying) return;
+      const q = teacherSet[(currentIndex-1) % teacherSet.length];
+      let ok=false;
+      if(q.type==='mc4'){
+        const chosen = document.querySelector('input[name="mc_choice"]:checked');
+        if(!chosen){ els.result.textContent='⚠️ Chọn một đáp án nhé!'; return; }
+        ok = (String(q.correct) === String(chosen.value));
+      } else {
+        if(currentAnswer===null){ ok=true; } // không đặt đáp án mẫu → coi là đúng để trải nghiệm
+        else { ok = (String(els.answer.value).trim() === String(currentAnswer)); }
+      }
+      if(ok){ els.result.textContent='✅ Chính xác!'; score+=10; } else { els.result.textContent=`❌ Sai!`; score=Math.max(score-5,0); }
+      els.scoreDisplay.textContent=`Điểm: ${score}`;
+      updateRanking();
+      nextQuestion_teacher();
+    }
+
+    els.btnStart.onclick = startGame;
+    els.btnEnd.onclick = endGame;
+    els.btnCheck.onclick = checkAnswer;
+    els.answer.addEventListener('keydown', e=>{ if(e.key==='Enter') checkAnswer(); });
+
+    // ---------- STUDENT – AI PANEL (giữ nguyên logic random theo độ khó) ----------
+    const elsAI = {
+      name:document.getElementById('playerNameAI'), btnStart:document.getElementById('btnStartAI'), btnEnd:document.getElementById('btnEndAI'),
+      timer:document.getElementById('timerAI'), duration:document.getElementById('durationAI'),
+      btnEasy:document.getElementById('btnEasyAI'), btnMedium:document.getElementById('btnMediumAI'), btnHard:document.getElementById('btnHardAI'),
+      question:document.getElementById('questionAI'), answer:document.getElementById('answerAI'), btnCheck:document.getElementById('btnCheckAI'),
+      result:document.getElementById('resultAI'), scoreDisplay:document.getElementById('scoreDisplayAI'), ranking:document.getElementById('rankingAI')
+    };
+    let currentAnswerAI='', scoreAI=0, playerNameAI='Bạn', isPlayingAI=false, opponentsAI=[], tickTimerAI=null, timerAI=null, timeLeftAI=0, durationAI=0;
+
+    function resetOpponentsAI(){opponentsAI = baseOpponents.map(name=>({name,score:0}));}
+    function updateRankingAI(){
+      const all=[...opponentsAI,{name:playerNameAI,score:scoreAI}].sort((a,b)=>b.score-a.score);
+      elsAI.ranking.innerHTML = all.map((p,i)=>{
+        let cls=''; if(i===0)cls='highlight-gold'; else if(i===1)cls='highlight-silver'; else if(i===2)cls='highlight-bronze';
+        if(p.name===playerNameAI) cls += ' player-row';
+        return `<tr class="${cls}"><td>${i+1}</td><td>${p.name}</td><td>${p.score}</td></tr>`;
+      }).join('');
+    }
+    function startSimAI(){ tickTimerAI=setInterval(()=>{opponentsAI.forEach(p=>p.score+=randInt(0,3)); updateRankingAI();},3000); }
+    function stopSimAI(){ if(tickTimerAI){ clearInterval(tickTimerAI); tickTimerAI=null; } }
+
+    function startTimerAI(){ if(durationAI===0){ elsAI.timer.textContent='⏰ Thời gian: Không giới hạn'; return; }
+      timeLeftAI=durationAI; updateTimerAI(); timerAI=setInterval(()=>{ timeLeftAI--; updateTimerAI(); if(timeLeftAI<=0){ endGameAI(); } },1000);
+    }
+    function stopTimerAI(){ if(timerAI){ clearInterval(timerAI); timerAI=null; } }
+    function updateTimerAI(){ elsAI.timer.textContent = `⏰ Thời gian: ${durationAI===0?'Không giới hạn':timeLeftAI+'s'}`; }
+
+    function lockUIAI(locked){ [elsAI.answer,elsAI.btnCheck,elsAI.btnEasy,elsAI.btnMedium,elsAI.btnHard].forEach(b=>b.disabled=locked); }
+
+    function setupAIStudent(){ lockUIAI(true); elsAI.btnStart.disabled=false; elsAI.btnEnd.disabled=true; elsAI.question.textContent='Hãy bắt đầu để tạo câu hỏi.'; elsAI.result.textContent=''; elsAI.scoreDisplay.textContent='Điểm: 0'; }
+
+    function startGameAI(){ playerNameAI=(elsAI.name.value||'Bạn').trim(); durationAI=parseInt(elsAI.duration.value); scoreAI=0; isPlayingAI=true; resetOpponentsAI(); updateRankingAI(); elsAI.scoreDisplay.textContent=`Điểm: ${scoreAI}`; elsAI.result.textContent=''; lockUIAI(false); elsAI.btnStart.disabled=true; elsAI.btnEnd.disabled=false; startSimAI(); startTimerAI(); }
+    function endGameAI(){ isPlayingAI=false; stopSimAI(); stopTimerAI(); lockUIAI(true); elsAI.btnStart.disabled=false; elsAI.btnEnd.disabled=true; elsAI.result.textContent='Trò chơi kết thúc!'; }
+
+    function randomQuestion(level){
+      let q='',a=0;
+      if(level==='easy'){
+        const n1=randInt(1,30),n2=randInt(1,30);const ops=['+','-'];const op=ops[randInt(0,1)];
+        if(op==='+'){q=`${n1} + ${n2} = ?`;a=n1+n2;} else { q=`${Math.max(n1,n2)} - ${Math.min(n1,n2)} = ?`; a=Math.abs(n1-n2);} }
+      if(level==='medium'){
+        const t=randInt(1,3);
+        if(t===1){const a1=randInt(2,12),a2=randInt(2,12);q=`${a1} × ${a2} = ?`;a=a1*a2;}
+        else if(t===2){const a1=randInt(2,12),a2=randInt(2,12);q=`${a1*a2} ÷ ${a1} = ?`;a=a2;}
+        else{const a1=randInt(2,15),a2=randInt(2,15),c=randInt(1,20);q=`${a1} × ${a2} + ${c} = ?`;a=a1*a2+c;} }
+      if(level==='hard'){
+        const t=randInt(1,3);
+        if(t===1){const n=randInt(3,12),m=randInt(2,6);q=`√${n*n} + ${m}² = ?`;a=n+m*m;}
+        else if(t===2){const a1=randInt(3,10),b1=randInt(3,10),c=[1,2,5][randInt(0,2)];q=`(${a1} + ${b1})² ÷ ${c} = ?`;a=((a1+b1)**2)/c;}
+        else{const a2=randInt(8,20),b2=randInt(1,a2-1);q=`${a2}² - ${b2}² = ?`;a=a2*a2-b2*b2;} }
+      return{q,a:String(a)};
+    }
+
+    function nextQuestionAI(level){ const {q,a} = randomQuestion(level); elsAI.question.textContent=q; currentAnswerAI=a; elsAI.result.textContent=''; elsAI.answer.value=''; }
+    function checkAnswerAI(){ if(!isPlayingAI) return; const ans = elsAI.answer.value.trim(); if(ans===''){ elsAI.result.textContent='⚠️ Nhập đáp án!'; return; } if(ans===currentAnswerAI){ elsAI.result.textContent='✅ Chính xác!'; scoreAI+=10; } else { elsAI.result.textContent=`❌ Sai! Đúng: ${currentAnswerAI}`; scoreAI=Math.max(scoreAI-5,0); } elsAI.scoreDisplay.textContent=`Điểm: ${scoreAI}`; elsAI.answer.value=''; updateRankingAI(); }
+
+    elsAI.btnStart.onclick = startGameAI; elsAI.btnEnd.onclick = endGameAI;
+    elsAI.btnEasy.onclick = ()=>nextQuestionAI('easy'); elsAI.btnMedium.onclick=()=>nextQuestionAI('medium'); elsAI.btnHard.onclick=()=>nextQuestionAI('hard'); elsAI.btnCheck.onclick=()=>{ checkAnswerAI(); nextQuestionAI('easy'); };
+    elsAI.answer.addEventListener('keydown', e=>{ if(e.key==='Enter'){ checkAnswerAI(); } });
+
+    // Chuẩn bị ban đầu
+    paintMyQuestions();
+    renderPreview();
+  </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chọn vai trò – 12A18</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="../tainguyenkhac/logo.png">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fffaf2;
+      color: #333;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: 
+        linear-gradient(rgba(255, 180, 90, 0.3), rgba(255, 230, 180, 0.7)),
+        url('../tainguyenkhac/a-tidy-study-corner-with-books-a-small-desk-and-carefully-placed-indoor-plants-entirely-empty-free-photo.jpeg') center/cover no-repeat;
+      filter: blur(2.5px) brightness(0.9);
+      opacity: 0.45;
+      z-index: -1;
+    }
+
+    :root { 
+        --brand:#FF8A00;
+        --brand-2:#FFD166;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:12px;background:conic-gradient(from 210deg, var(--brand), var(--brand-2));color:#fff;font-weight:900;box-shadow:var(--shadow)}
+    .wordmark{font-size:20px;font-weight:800;letter-spacing:.2px}
+    .wordmark sup{font-size:.7em;font-weight:700; margin-left:2px; color:var(--brand)}
+    /* Navbar */
+    nav {
+      background-color: #ff8c00;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 40px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      height: 45px;
+    }
+
+    .logo h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    /* Main content */
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 80px);
+      text-align: center;
+    }
+
+    h2 {
+      color: #ff8c00;
+      font-size: 2rem;
+      margin-bottom: 40px;
+    }
+
+    .role-options {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .role-card {
+      background: white;
+      border: 2px solid #ffd699;
+      border-radius: 15px;
+      padding: 40px 60px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .role-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 20px rgba(255, 140, 0, 0.3);
+      border-color: #ffb84d;
+    }
+
+    @media (max-width: 600px) {
+      .role-card {
+        padding: 25px 40px;
+        font-size: 1.1rem;
+      }
+      h2 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand">
+        <div class="logo">A+</div>
+        <div class="wordmark">Math A<sup>+</sup></div>
+    </div>
+    </div>
+  </nav>
+
+  <main>
+    <h2>Chọn vai trò của bạn</h2>
+    <div class="role-options">
+      <a href="app.html" class="role-card">👩‍🏫 Giáo viên</a>
+      <a href="student.html" class="role-card">🧑‍🎓 Học sinh</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ứng dụng Toán học</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Poppins',sans-serif;background:#f9fafc;color:#222;transition:background-color .8s ease}
+    nav{width:100%;height:70px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center}
+    .logo-slot{width:200px;height:50px;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#888}
+    main{max-width:900px;margin:40px auto 80px;background:#fff;padding:30px 40px;border-radius:20px;box-shadow:0 4px 10px rgba(0,0,0,.05);transition:background-color .8s ease}
+    h1{text-align:center;margin-bottom:10px;color:#333}
+    .subtitle{text-align:center;color:#666;margin-bottom:20px}
+    .start-panel{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;margin-bottom:20px}
+    .start-panel input,select{padding:10px 12px;border-radius:10px;border:1px solid #ddd;font-size:1rem}
+    .btn{padding:10px 16px;border:none;border-radius:10px;cursor:pointer;font-weight:600;transition:.2s}
+    .btn-primary{background:#2f6fed;color:#fff}
+    .btn-secondary{background:#f0f0f0}
+    .btn-danger{background:#ff5c5c;color:#fff}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .difficulty{display:flex;justify-content:center;gap:10px;margin:10px 0 20px}
+    .easy{background:#dfffe0}.medium{background:#fff4d5}.hard{background:#ffdcdc}
+    .easy:hover{background:#bfffbf}.medium:hover{background:#ffeaa0}.hard:hover{background:#ffb3b3}
+    .question-area{margin-top:10px}
+    .question-box{text-align:center;font-size:1.2rem;margin-bottom:16px;min-height:60px}
+    .answer-box{display:flex;gap:10px;justify-content:center;align-items:center}
+    .answer-box input{padding:8px 10px;border-radius:10px;border:1px solid #ccc;width:140px;text-align:center;font-size:1rem}
+    #result{text-align:center;font-weight:600;margin-top:12px;min-height:24px}
+    #scoreDisplay{text-align:center;margin-top:10px;font-weight:700}
+    #timer{text-align:center;font-weight:600;color:#333;margin-top:8px}
+    .scoreboard{margin-top:30px;border-top:2px solid #eee;padding-top:16px}
+    .scoreboard h2{text-align:center;margin-bottom:10px}
+    table{width:100%;border-collapse:collapse;text-align:center}
+    th,td{padding:10px;border-bottom:1px solid #eee}
+    th{background:#f3f3f3}
+    .highlight-gold{background:#fff6a3;font-weight:600}
+    .highlight-silver{background:#dce2f9;font-weight:600}
+    .highlight-bronze{background:#f2d2b2;font-weight:600}
+    .player-row{font-weight:700}
+
+    /* -------- Responsive -------- */
+    @media (max-width:900px){
+      main{margin:20px auto 60px;padding:20px 24px}
+      .start-panel{grid-template-columns:1fr 1fr;gap:8px}
+      .start-panel select,.start-panel input{width:100%}
+      .btn{width:100%}
+      .answer-box{flex-direction:column;gap:8px}
+      .difficulty{flex-wrap:wrap}
+    }
+    @media (max-width:700px){
+      body{font-size:.95rem}
+      nav{height:60px}
+      .logo-slot{width:160px;height:40px;font-size:.9rem}
+      h1{font-size:1.2rem}
+      .btn{padding:8px 10px;font-size:.9rem}
+      th,td{padding:8px;font-size:.9rem}
+      main{box-shadow:none;border-radius:10px}
+    }
+    @media (max-width:500px){
+      .start-panel{grid-template-columns:1fr;gap:6px}
+      .logo-slot{width:130px;height:36px}
+      .subtitle{font-size:.9rem}
+      h1{font-size:1.1rem}
+      .difficulty{gap:6px}
+      .btn{border-radius:8px}
+      .answer-box input{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <nav><div class="logo-slot">Chèn logo ở đây</div></nav>
+  <main>
+    <h1>🎯 Luyện tập Toán học</h1>
+    <p class="subtitle">Chọn thời gian thi đấu, nhập tên và bắt đầu!</p>
+
+    <div class="start-panel">
+      <input id="playerName" type="text" placeholder="Nhập tên của bạn..." />
+      <select id="duration">
+        <option value="0">⏳ Không giới hạn</option>
+        <option value="60">1 phút</option>
+        <option value="120">2 phút</option>
+        <option value="300">5 phút</option>
+      </select>
+      <button id="btnStart" class="btn btn-primary">Bắt đầu</button>
+      <button id="btnEnd" class="btn btn-danger" disabled>Kết thúc</button>
+    </div>
+
+    <p id="timer">⏰ Thời gian: --</p>
+
+    <div class="difficulty">
+      <button class="btn easy" id="btnEasy" disabled>Dễ</button>
+      <button class="btn medium" id="btnMedium" disabled>Trung bình</button>
+      <button class="btn hard" id="btnHard" disabled>Khó</button>
+    </div>
+
+    <div class="question-area">
+      <div class="question-box" id="question">Hãy bắt đầu để tạo câu hỏi ngẫu nhiên.</div>
+      <div class="answer-box">
+        <input type="text" id="answer" placeholder="Nhập đáp án..." disabled />
+        <button id="btnCheck" class="btn btn-secondary" disabled>Kiểm tra</button>
+      </div>
+      <p id="result"></p>
+      <p id="scoreDisplay">Điểm: 0</p>
+    </div>
+
+    <div class="scoreboard">
+      <h2>🏆 Bảng xếp hạng (mô phỏng)</h2>
+      <table>
+        <thead><tr><th>Hạng</th><th>Tên</th><th>Điểm</th></tr></thead>
+        <tbody id="ranking"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const randInt=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+    let currentAnswer='',score=0,playerName='Bạn',isPlaying=false,opponents=[],tickTimer=null,timer=null,timeLeft=0,duration=0;
+    const baseOpponents=['Lan','Minh','An','Khoa','Hà'];
+    const els={name:playerName=document.getElementById('playerName'),btnStart:btnStart=document.getElementById('btnStart'),btnEnd:btnEnd=document.getElementById('btnEnd'),
+      btnEasy:btnEasy=document.getElementById('btnEasy'),btnMedium:btnMedium=document.getElementById('btnMedium'),btnHard:btnHard=document.getElementById('btnHard'),
+      question:question=document.getElementById('question'),answer:answer=document.getElementById('answer'),btnCheck:btnCheck=document.getElementById('btnCheck'),
+      result:result=document.getElementById('result'),scoreDisplay:scoreDisplay=document.getElementById('scoreDisplay'),ranking:ranking=document.getElementById('ranking'),
+      timer:timerDisplay=document.getElementById('timer'),duration:durationSel=document.getElementById('duration'),main:document.querySelector('main'),body:document.body};
+    const randomQuestion=(level)=>{let q='',a=0;
+      if(level==='easy'){const n1=randInt(1,30),n2=randInt(1,30),ops=['+','-'],op=ops[randInt(0,1)];
+        if(op==='+'){q=`${n1}+${n2}=?`;a=n1+n2;}else{q=`${Math.max(n1,n2)}-${Math.min(n1,n2)}=?`;a=Math.abs(n1-n2);} }
+      if(level==='medium'){const t=randInt(1,3);
+        if(t===1){const a1=randInt(2,12),a2=randInt(2,12);q=`${a1}×${a2}=?`;a=a1*a2;}
+        else if(t===2){const a1=randInt(2,12),a2=randInt(2,12);q=`${a1*a2}÷${a1}=?`;a=a2;}
+        else{const a1=randInt(2,15),a2=randInt(2,15),c=randInt(1,20);q=`${a1}×${a2}+${c}=?`;a=a1*a2+c;} }
+      if(level==='hard'){const t=randInt(1,3);
+        if(t===1){const n=randInt(3,12),m=randInt(2,6);q=`√${n*n}+${m}²=?`;a=n+m*m;}
+        else if(t===2){const a1=randInt(3,10),b1=randInt(3,10),c=[1,2,5][randInt(0,2)];q=`(${a1}+${b1})²÷${c}=?`;a=((a1+b1)**2)/c;}
+        else{const a2=randInt(8,20),b2=randInt(1,a2-1);q=`${a2}²-${b2}²=?`;a=a2*a2-b2*b2;} }
+      return{q,a:String(a)};};
+    function resetOpponents(){opponents=baseOpponents.map(name=>({name,score:0}));}
+    function updateRanking(){const all=[...opponents,{name:playerName,score}].sort((a,b)=>b.score-a.score);
+      els.ranking.innerHTML=all.map((p,i)=>{let cls='';if(i===0)cls='highlight-gold';else if(i===1)cls='highlight-silver';else if(i===2)cls='highlight-bronze';if(p.name===playerName)cls+=' player-row';
+        return`<tr class="${cls}"><td>${i+1}</td><td>${p.name}</td><td>${p.score}</td></tr>`;}).join('');}
+    function startSim(){tickTimer=setInterval(()=>{opponents.forEach(p=>p.score+=randInt(0,3));updateRanking();},3000);}
+    function stopSim(){if(tickTimer){clearInterval(tickTimer);tickTimer=null;}}
+    function startTimer(){if(duration===0)return;timeLeft=duration;updateTimer();timer=setInterval(()=>{timeLeft--;updateTimer();if(timeLeft<=0){endGame();}},1000);}
+    function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
+    function updateTimer(){els.timer.textContent=`⏰ Thời gian: ${duration===0?'Không giới hạn':timeLeft+'s'}`;}
+    function lockUI(locked){[els.btnEasy,els.btnMedium,els.btnHard,els.answer,els.btnCheck].forEach(b=>b.disabled=locked);}
+    function startGame(){playerName=(els.name.value||'Bạn').trim();duration=parseInt(els.duration.value);score=0;isPlaying=true;resetOpponents();updateRanking();els.scoreDisplay.textContent=`Điểm: ${score}`;els.result.textContent='';els.question.textContent='Chọn độ khó để tạo câu hỏi';lockUI(false);els.btnStart.disabled=true;els.name.disabled=true;els.btnEnd.disabled=false;startSim();startTimer();els.main.style.backgroundColor='white';els.body.style.backgroundColor='#f9fafc';}
+    function endGame(){isPlaying=false;stopSim();stopTimer();lockUI(true);els.btnStart.disabled=false;els.name.disabled=false;els.btnEnd.disabled=true;els.question.textContent='Trò chơi kết thúc!';els.body.style.backgroundColor='#f3eac2';els.main.style.backgroundColor='#fffaf0';}
+    function checkAnswer(){if(!isPlaying)return;const ans=els.answer.value.trim();if(ans===''){els.result.textContent='⚠️ Nhập đáp án!';return;}if(ans===currentAnswer){els.result.textContent='✅ Chính xác!';score+=10;}else{els.result.textContent=`❌ Sai! Đúng: ${currentAnswer}`;score=Math.max(score-5,0);}els.scoreDisplay.textContent=`Điểm: ${score}`;els.answer.value='';updateRanking();}
+    function nextQuestion(level){const{q,a}=randomQuestion(level);els.question.textContent=q;currentAnswer=a;els.result.textContent='';}
+    els.btnStart.onclick=()=>startGame();els.btnEnd.onclick=()=>endGame();els.btnEasy.onclick=()=>nextQuestion('easy');els.btnMedium.onclick=()=>nextQuestion('medium');els.btnHard.onclick=()=>nextQuestion('hard');els.btnCheck.onclick=()=>{checkAnswer();nextQuestion('easy');};els.answer.onkeydown=e=>{if(e.key==='Enter'){checkAnswer();}};
+    lockUI(true);updateTimer();
+  </script>
+</body>
+</html>
