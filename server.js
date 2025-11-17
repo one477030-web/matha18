@@ -7,10 +7,6 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server đang chạy tại port ${PORT}`);
-});
-
 
 app.use(express.static(__dirname));
 app.use(bodyParser.json());
@@ -96,6 +92,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Server chạy tại: http://localhost:${PORT}/qanda.html`);
 
 });
+
 
 
 
