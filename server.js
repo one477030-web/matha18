@@ -20,6 +20,10 @@ const HF_API_URL = "https://router.huggingface.co/v1/chat/completions";
 const MODEL = "Qwen/Qwen2.5-7B-Instruct";
 const HF_TOKEN = process.env.HF_TOKEN;
 
+
+console.log("🔥 TOKEN = ", HF_TOKEN);
+
+
 app.post("/ask", async (req, res) => {
   try {
     const { question, role } = req.body;
@@ -92,3 +96,4 @@ app.listen(PORT, () => {
   console.log(`🚀 Server chạy tại: http://localhost:${PORT}/qanda.html`);
 
 });
+
