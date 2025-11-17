@@ -4,13 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hỏi-AI Toán – Học sinh & Giáo viên</title>
-  <link rel="icon" href="tainguyenkhac/logo.png">
-  
+
   <!-- (Tuỳ chọn) Poppins cho đồng bộ giao diện -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
   <style>
     :root{
       --mint:#e8f9f0;      /* nền pastel */
@@ -178,171 +176,165 @@
   </main>
 
   <script>
-    // ====== Elements ======
-    const roleEl = document.getElementById('role');
-    const questionEl = document.getElementById('question');
-    const btnSend = document.getElementById('btnSend');
-    const btnClear = document.getElementById('btnClear');
-    const kp = document.getElementById('keypad');
-    const errEl = document.getElementById('err');
-    const tbody = document.getElementById('historyBody');
+  // ====== Elements ======
+  const roleEl = document.getElementById('role');
+  const questionEl = document.getElementById('question');
+  const btnSend = document.getElementById('btnSend');
+  const btnClear = document.getElementById('btnClear');
+  const kp = document.getElementById('keypad');
+  const errEl = document.getElementById('err');
+  const tbody = document.getElementById('historyBody');
 
-    // ====== Helpers ======
-    const nowStr = () => new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
-    const sanitize = (s) => String(s)
-      .replaceAll('<','&lt;')
-      .replaceAll('>','&gt;');
+  // ====== Helpers ======
+  const nowStr = () => new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+  const sanitize = (s) => String(s)
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;');
 
-    function roleBadge(role){
-      if(role==='student') return '<span class="badge badge-stu">👨‍🎓 Học sinh</span>';
-      if(role==='teacher') return '<span class="badge badge-tea">👩‍🏫 Giáo viên</span>';
-      return '<span class="badge badge-ai">🤖 AI Toán</span>';
-    }
+  function roleBadge(role){
+    if(role==='student') return '<span class="badge badge-stu">👨‍🎓 Học sinh</span>';
+    if(role==='teacher') return '<span class="badge badge-tea">👩‍🏫 Giáo viên</span>';
+    return '<span class="badge badge-ai">🤖 AI Toán</span>';
+  }
 
-    function addRow(role, htmlContent, timeStr){
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="col-role">${roleBadge(role)}</td>
-        <td>${htmlContent}</td>
-        <td class="col-time">${timeStr || nowStr()}</td>
-      `;
-      tbody.appendChild(tr);
-      // auto scroll
-      tr.scrollIntoView({block:'end'});
-      return tr;
-    }
+  function addRow(role, htmlContent, timeStr){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="col-role">${roleBadge(role)}</td>
+      <td>${htmlContent}</td>
+      <td class="col-time">${timeStr || nowStr()}</td>
+    `;
+    tbody.appendChild(tr);
+    tr.scrollIntoView({block:'end'});
+    return tr;
+  }
 
-    function setError(msg){
-      if(!msg){ errEl.style.display='none'; errEl.textContent=''; return; }
-      errEl.textContent = msg;
-      errEl.style.display = 'block';
-    }
+  function setError(msg){
+    if(!msg){ errEl.style.display='none'; errEl.textContent=''; return; }
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+  }
 
-    // keypad insert
-    let lastFocus = questionEl;
-    questionEl.addEventListener('focus', ()=> lastFocus = questionEl);
-    kp.addEventListener('click', (e)=>{
-      if(!e.target.classList.contains('kbd')) return;
-      const ins = e.target.getAttribute('data-ins');
-      const ta = lastFocus || questionEl;
-      const start = ta.selectionStart ?? ta.value.length;
-      const end = ta.selectionEnd ?? ta.value.length;
-      const before = ta.value.slice(0,start);
-      const after = ta.value.slice(end);
-      let text = ins;
-      if(ins==='×') text='*';
-      if(ins==='÷') text='/';
-      if(ins==='π') text='pi';
-      if(ins==='√(') text='sqrt(';
-      ta.value = before + text + after;
-      ta.focus();
-      const caret = start + text.length;
-      ta.setSelectionRange(caret, caret);
+  // keypad insert
+  let lastFocus = questionEl;
+  questionEl.addEventListener('focus', ()=> lastFocus = questionEl);
+  kp.addEventListener('click', (e)=>{
+    if(!e.target.classList.contains('kbd')) return;
+    const ins = e.target.getAttribute('data-ins');
+    const ta = lastFocus || questionEl;
+    const start = ta.selectionStart ?? ta.value.length;
+    const end = ta.selectionEnd ?? ta.value.length;
+    const before = ta.value.slice(0,start);
+    const after = ta.value.slice(end);
+    let text = ins;
+    if(ins==='×') text='*';
+    if(ins==='÷') text='/';
+    if(ins==='π') text='pi';
+    if(ins==='√(') text='sqrt(';
+    ta.value = before + text + after;
+    ta.focus();
+    const caret = start + text.length;
+    ta.setSelectionRange(caret, caret);
+  });
+
+  // ====== Typing effect for AI ======
+  function typeAnswer(targetCell, fullText, speed=15){
+    return new Promise(resolve=>{
+      targetCell.textContent = '';
+      let i=0;
+      const timer = setInterval(()=>{
+        targetCell.textContent += fullText[i] ?? '';
+        i++;
+        if(i>=fullText.length){ clearInterval(timer); resolve(); }
+      }, speed);
+    });
+  }
+
+  
+  async function generateAnswer(userQuestion, role) {
+  try {
+    const res = await fetch("/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+      question: userQuestion,
+      role: role
+      })
     });
 
-    // ====== Typing effect for AI ======
-    function typeAnswer(targetCell, fullText, speed=15){
-      return new Promise(resolve=>{
-        targetCell.textContent = ''; // clear
-        let i=0;
-        const timer = setInterval(()=>{
-          targetCell.textContent += fullText[i];
-          i++;
-          if(i>=fullText.length){ clearInterval(timer); resolve(); }
-        }, speed);
-      });
+    const data = await res.json();
+    return data.answer;
+  } catch (err) {
+    console.error(err);
+    return "Không kết nối được server.";
+  }
+}
+
+  // ====== Send / Clear ======
+  async function handleSend(){
+    setError('');
+    const role = roleEl.value;
+    const qTextRaw = questionEl.value;
+    const qText = qTextRaw.trim();
+    if(!qText){ setError('Vui lòng nhập câu hỏi.'); return; }
+
+    // thêm dòng câu hỏi
+    addRow(role, `<div class="mono">${sanitize(qText).replaceAll('\n','<br>')}</div>`);
+
+    // placeholder AI "đang gõ..."
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="col-role">${roleBadge('ai')}</td>
+      <td><span class="muted">Đang gõ…</span></td>
+      <td class="col-time">${nowStr()}</td>
+    `;
+    tbody.appendChild(tr);
+    tr.scrollIntoView({block:'end'});
+
+    const aiCell = tr.children[1];
+
+    let answer = "";
+    try{
+      await new Promise(r => setTimeout(r, 600));
+      answer = await generateAnswer(qText, role);
+    }catch(e){
+      console.error(e);
+      answer = "Xin lỗi, có lỗi khi tạo câu trả lời.";
     }
 
-    // ====== API hook (em gắn AI thật ở đây) ======
-    /**
-     * TODO: Thay thân hàm này bằng call tới API AI thật (OpenAI/Gemini/v.v.)
-     * return Promise<string> chứa nội dung trả lời.
-     */
-    async function generateAnswer(userQuestion, role){
-      // --- demo giả lập: trả lời gợi ý theo vai trò ---
-      const q = userQuestion.trim();
-      if(!q) return "Anh/chị hãy nhập câu hỏi cụ thể nhé.";
+    aiCell.textContent = "";
+    const full = answer;
+    await typeAnswer(aiCell, full, 12);
+    aiCell.innerHTML = sanitize(aiCell.textContent).replaceAll('\n','<br>');
 
-      // vài gợi ý template thông minh nhẹ để demo
-      const tips = {
-        student: "Gợi ý học sinh: hãy thử biến đổi, tách hạng tử, kiểm tra điều kiện xác định trước.",
-        teacher: "Gợi ý giáo viên: có thể hướng dẫn HS tìm điều kiện, đặt ẩn phụ, hoặc kiểm tra đồ thị minh hoạ.",
-      };
-      const header = (role==='teacher') ? tips.teacher : tips.student;
+    questionEl.value = '';
+    questionEl.focus();
+  }
 
-      // Nếu thấy "∫" hay "int" → giả lập tích phân
-      if(q.includes('∫') || /\bint\b/i.test(q)) {
-        return `${header}\n\n• Với bài tích phân, trước hết kiểm tra dạng cơ bản (mũ, đa thức, lượng giác).\n• Có thể dùng từng phần: ∫u dv = u·v − ∫v du.\n• Nếu là ∫ x·e^x dx thì đặt: u = x, dv = e^x dx.\n\nKết quả mẫu: ∫ x·e^x dx = x·e^x − e^x + C.`;
-      }
-      // Nếu thấy phương trình bậc hai
-      if(/[=].*0/.test(q) && /x\^?2/.test(q)) {
-        return `${header}\n\n• Dạng phương trình bậc hai: ax² + bx + c = 0.\n• Công thức nghiệm: Δ = b² − 4ac; x = (−b ± √Δ)/(2a).\n• Nhớ xét Δ < 0 (vô nghiệm thực), Δ = 0 (nghiệm kép), Δ > 0 (hai nghiệm phân biệt).`;
-      }
-      // Mặc định
-      return `${header}\n\n• Phân tích đề: xác định mục tiêu (giải PT, chứng minh, tìm GTLN/GTLN...).\n• Xác định công cụ: hằng đẳng thức, đạo hàm, đồ thị, bất đẳng thức quen thuộc.\n• Làm thử bước đầu, nếu kẹt: đơn giản hoá, thử giá trị đặc biệt, hoặc vẽ phác đồ thị hỗ trợ.`;
+  btnSend.addEventListener('click', handleSend);
+  questionEl.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' && !e.shiftKey){
+      e.preventDefault();
+      handleSend();
     }
+  });
 
-    // ====== Send / Clear ======
-    async function handleSend(){
+  btnClear.addEventListener('click', ()=>{
+    if(confirm('Xoá toàn bộ lịch sử?')){
+      tbody.innerHTML = '';
       setError('');
-      const role = roleEl.value; // student | teacher
-      const qTextRaw = questionEl.value;
-      const qText = qTextRaw.trim();
-      if(!qText){ setError('Vui lòng nhập câu hỏi.'); return; }
-
-      // thêm dòng câu hỏi
-      addRow(role, `<div class="mono">${sanitize(qText).replaceAll('\n','<br>')}</div>`);
-
-      // placeholder AI "đang gõ..."
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="col-role">${roleBadge('ai')}</td>
-        <td><span class="muted">Đang gõ…</span></td>
-        <td class="col-time">${nowStr()}</td>
-      `;
-      tbody.appendChild(tr);
-      tr.scrollIntoView({block:'end'});
-
-      // lấy cell nội dung để type
-      const aiCell = tr.children[1];
-
-      // gọi "AI" (hiện tại là giả lập); em thay generateAnswer bằng call thật
-      let answer = "";
-      try{
-        // tạo độ trễ nhẹ cho cảm giác thật
-        await new Promise(r => setTimeout(r, 600));
-        answer = await generateAnswer(qText, role);
-      }catch(e){
-        answer = "Xin lỗi, có lỗi khi tạo câu trả lời.";
-      }
-
-      // gõ dần từng ký tự
-      aiCell.textContent = "";
-      const full = answer;
-      await typeAnswer(aiCell, full, 12);
-      // format xuống dòng
-      aiCell.innerHTML = sanitize(aiCell.textContent).replaceAll('\n','<br>');
-
-      // clear input
-      questionEl.value = '';
-      questionEl.focus();
     }
+  });
+</script>
+<!-- Cấu hình MathJax -->
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
 
-    btnSend.addEventListener('click', handleSend);
-    questionEl.addEventListener('keydown', (e)=>{
-      if(e.key==='Enter' && !e.shiftKey){
-        e.preventDefault();
-        handleSend();
-      }
-    });
-
-    btnClear.addEventListener('click', ()=>{
-      if(confirm('Xoá toàn bộ lịch sử?')){
-        tbody.innerHTML = '';
-        setError('');
-      }
-    });
-  </script>
+<!-- Tải MathJax sau khi HTML parse xong -->
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </body>
 </html>
-
