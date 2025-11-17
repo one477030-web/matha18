@@ -16,7 +16,7 @@ app.use(express.static(__dirname));
 app.use(bodyParser.json());
 
 // HuggingFace Router (OpenAI format)
-const HF_API_URL = "https://router.huggingface.co/v1/chat/completions";
+const HF_API_URL = "http://router.huggingface.co/v1/chat/completions";
 const MODEL = "Qwen/Qwen2.5-7B-Instruct";
 const HF_TOKEN = process.env.HF_TOKEN;
 
@@ -96,4 +96,5 @@ app.listen(PORT, () => {
   console.log(`🚀 Server chạy tại: http://localhost:${PORT}/qanda.html`);
 
 });
+
 
